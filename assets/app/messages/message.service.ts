@@ -65,7 +65,7 @@ export class MessageService{
         const token = localStorage.getItem('token') 
         ? '?token=' + localStorage.getItem('token')
         : '';
-        return this.http.patch('http://localhost:6000/api/message/'+message.messageId+token,body,{headers:headers})
+        return this.http.patch('http://45.33.40.106:6000/api/message/'+message.messageId+token,body,{headers:headers})
             .map((response: Response)=> response.json())
             .catch((error:Response)=>{
                 this.errorService.handleError(error.json()); 
@@ -82,7 +82,7 @@ export class MessageService{
         const token = localStorage.getItem('token') 
         ? '?token=' + localStorage.getItem('token')
         : '';
-        return this.http.delete('http://localhost:6000/api/message/'+message.messageId+token)
+        return this.http.delete('http://45.33.40.106:6000/api/message/'+message.messageId+token)
         .map((response: Response)=> response.json())
         .catch((error:Response)=>{
             this.errorService.handleError(error.json()); 
