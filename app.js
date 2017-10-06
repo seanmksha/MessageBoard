@@ -11,7 +11,7 @@ var userRoutes = require('./routes/user');
 var mongoose = require('mongoose');
 
 var app = express();
-mongoose.connect('localhost:27017/node-angular');
+mongoose.connect('http://45.33.40.106:27017/node-angular');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
