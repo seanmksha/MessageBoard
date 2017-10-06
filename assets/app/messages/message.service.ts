@@ -82,7 +82,7 @@ export class MessageService{
         const token = localStorage.getItem('token') 
         ? '?token=' + localStorage.getItem('token')
         : '';
-        return this.http.delete('http://45.33.40.106:6000/api/message/'+message.messageId+token)
+        return this.http.delete('http://45.33.40.106/app2/api/message/'+message.messageId+token)
         .map((response: Response)=> response.json())
         .catch((error:Response)=>{
             this.errorService.handleError(error.json()); 
