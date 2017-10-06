@@ -20,7 +20,7 @@ export class MessageService{
         const token = localStorage.getItem('token') 
         ? '?token=' + localStorage.getItem('token')
         : '';
-        return this.http.post('http://45.33.40.106/app2/api/message'+token,body,{headers:headers})
+        return this.http.post('http://45.33.40.106:3001/api/message'+token,body,{headers:headers})
             .map((response: Response)=> {
                 const result = response.json();
                 console.log(result.obj);
@@ -38,12 +38,12 @@ export class MessageService{
     }
 
     getMessage(){
-        return this.http.get('http://45.33.40.106/app2/api/message')
+        return this.http.get('http://45.33.40.106:3001/api/message')
         .map((response: Response)=> {
             const messages = response.json().obj;
             let transformedMessages: Message[]=[];
             for(let message of messages){
-                console.log()
+                console.log();
                 transformedMessages.push(new Message(
                     message.content,  
                     message.username,
@@ -65,7 +65,7 @@ export class MessageService{
         const token = localStorage.getItem('token') 
         ? '?token=' + localStorage.getItem('token')
         : '';
-        return this.http.patch('http://45.33.40.106/app2/api/message/'+message.messageId+token,body,{headers:headers})
+        return this.http.patch('http://45.33.40.106:3001/api/message/'+message.messageId+token,body,{headers:headers})
             .map((response: Response)=> response.json())
             .catch((error:Response)=>{
                 this.errorService.handleError(error.json()); 
@@ -82,7 +82,7 @@ export class MessageService{
         const token = localStorage.getItem('token') 
         ? '?token=' + localStorage.getItem('token')
         : '';
-        return this.http.delete('http://45.33.40.106/app2/api/message/'+message.messageId+token)
+        return this.http.delete('http://45.33.40.106:3001/api/message/'+message.messageId+token)
         .map((response: Response)=> response.json())
         .catch((error:Response)=>{
             this.errorService.handleError(error.json()); 
