@@ -5,6 +5,9 @@ var randomstring = require("randomstring");
 var bcrypt = require('bcryptjs');
 var Message= require('../models/message');
 var jwt= require('jsonwebtoken');
+var User = require('../models/user');
+const keys = require('../config/keys');
+const nodemailer = require("nodemailer");
 /*var schema = new Schema({
     googleId:String,
     credits: { type:Number,default:0 },
@@ -18,7 +21,15 @@ var jwt= require('jsonwebtoken');
     email:{type:String, required:true, unique:true},
     messages:[{type:Schema.Types.ObjectId, ref:'Message'}]
 });*/
+var smtpTransport = nodemailer.createTransport({
+    service: "SendGrid",
+    auth: {
+        user: keys.emailerUser,
+        pass: keys.emailerKey
+    }
+});
 router.post('/signin',function(req,res,next){
+    console.log("called");
     User.findOne({$or: [{'email': req.body.email}, {'username': req.body.email}]},
 function(err,user){
     console.log("test1");
@@ -36,7 +47,10 @@ function(err,user){
     }
     console.log("test2");
     if(!user.verified){
-
+        return res.status(401).json({
+            title:'Login failed',
+            error:{message:"User's e-mail address is not verified."}
+         });
     }
     if(!bcrypt.compareSync(req.body.password,user.password))
         {
@@ -54,18 +68,51 @@ function(err,user){
 
 
 })
+console.log("test1");
 });
-router.post('/', function (req, res, next) {
-    var random = randomstring.generate();
-    var user = new User({
+
+router.post('/', async function (req, res, next) {
+    var verifier = randomstring.generate();
+   console.log(req.body.username);
+    req.checkBody('firstName','Name is required').notEmpty();
+    req.checkBody('lastName','Email is required').notEmpty();
+    req.checkBody('email', 'Email is not valid').isEmail();
+    req.checkBody('username', 'Username is required').notEmpty();
+    req.checkBody('password','Password is required').notEmpty();
+    var username= req.body.username;
+    var email=req.body.email;
+    var errors=req.validationErrors();
+    if(errors)
+    {
+        return res.status(401).json({
+            title:'An error occured',
+            error:"Missing Fields!"
+        });
+    }
+    
+    User.findOne({username:username},function(err,returnedUser){
+    if(!returnedUser)
+     {
+        User.findOne({email:email},function(err,returnedEmail)
+        {
+            if(err){
+              return res.status(500).json({
+                 title:'An error occured',
+                 error:err
+              });
+             }
+        if(!returnedEmail)
+             {
+                var user = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         password: bcrypt.hashSync(req.body.password, 10),
         email:  req.body.email,
-        verified: true,
-        verifyRand:random,
+        verified: false,
+        verifyRand:verifier,
         username: req.body.username
     });
+    
     console.log(user);
     user.save(function(err,result){
         if(err){
@@ -74,11 +121,61 @@ router.post('/', function (req, res, next) {
                 error:err
             });
         }
-        res.status(201).json({
-            message: 'User created',
-            obj:result
-        });
+        var mailOptions={
+            from: "no.reply@krystowers.com",
+            to : email,
+            subject : "Please confirm your Email account",
+            html : "<h3>Welcome to Krys Towers Web Development Apps</h3><p>This email is to verify the account:"+user.username+
+            "<div>Click on the following link to verify your account:<a href=\""+
+            keys.redirectDomain+"/api/verify/"+user.username+"/"+ verifier+"\">Verify Account</a></div>"
+         };
+            smtpTransport.sendMail(mailOptions, function(error, response){
+                if(error){
+                       console.log(error);
+                       return res.status(500).json({
+                        title:'An error occured',
+                        error:err
+                    });
+                       
+                }else{
+                       console.log("Message sent: " + response.message);
+                       
+                       res.status(201).json({
+                        message: 'User successfully created, please verify your email before logging in',
+                        obj:result
+                    });
+                       
+                    }
+                });
+
+
+
+
+
+       
     });
+             }
+    else
+        {
+            return res.status(500).json({
+                title:'An error occured',
+                error:"E-mail already registerd. "
+            });
+        }
+     
+    });
+
+
+     }
+     else
+        {
+            return res.status(500).json({
+                title:'An error occured',
+                error:"Username already registerd. "
+            });
+        }
+    });
+
 });
 //$or: [{'email': email}, {'username': email}]}
 

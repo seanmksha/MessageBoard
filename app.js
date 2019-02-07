@@ -4,8 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
+var expressValidator = require('express-validator');
 var appRoutes = require('./routes/app');
+var verifyRoutes = require('./routes/verify');
 var messageRoutes = require('./routes/messages');
 var userRoutes = require('./routes/user');
 var mongoose = require('mongoose');
@@ -19,6 +20,7 @@ app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(expressValidator());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -26,6 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function (req, res, next) {
+
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PATCH, DELETE, OPTIONS');
@@ -35,6 +38,7 @@ app.use(function (req, res, next) {
 
 app.use('/api/user',userRoutes);
 app.use('/api/message', messageRoutes);
+app.use('/api/verify', verifyRoutes);
 app.use('/', appRoutes);
 
 // catch 404 and forward to error handler
