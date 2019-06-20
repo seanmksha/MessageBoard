@@ -4,6 +4,9 @@ var User = require('../models/user');
 var jwt= require('jsonwebtoken');
 var Message= require('../models/message');
 var User = require('../models/user');
+/**
+ * Check messages with the same firstName
+ */
 router.get('/',function(req,res,next){
     Message.find()
     .populate('user','firstName')
@@ -23,6 +26,9 @@ router.get('/',function(req,res,next){
 
 });
 
+/**
+ * Verify if the user is authenticated
+ */
 router.use('/',function(req,res,next){
     jwt.verify(req.query.token,'secret',function(err,decoded){
         if(err){
@@ -35,6 +41,9 @@ router.use('/',function(req,res,next){
     });
 });
 
+/**
+ * Save messages
+ */
 router.post('/', function (req, res, next) {
     var decoded = jwt.decode(req.query.token);
     User.findById(decoded.user._id,function(err,user){
@@ -67,7 +76,9 @@ router.post('/', function (req, res, next) {
     });
     
 });
-
+/**
+ * Update messages
+ */
 router.patch('/:id',function(req,res,next){
     var decoded= jwt.decode(req.query.token);
     Message.findById(req.params.id, function(err, message){
@@ -105,6 +116,9 @@ router.patch('/:id',function(req,res,next){
     });
 });
 
+/**
+ * Delete messages
+ */
 router.delete('/:id',function(req,res,next){
     var decoded= jwt.decode(req.query.token);
     Message.findById(req.params.id, function(err, message){

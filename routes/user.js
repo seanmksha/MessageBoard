@@ -28,11 +28,14 @@ var smtpTransport = nodemailer.createTransport({
         pass: keys.emailerKey
     }
 });
+/**
+ *  Sign in route: checks to see if an email and username exists, if it doesn't exist create one and send out a verification email
+ */
 router.post('/signin',function(req,res,next){
     console.log("called");
     User.findOne({$or: [{'email': req.body.email}, {'username': req.body.email}]},
 function(err,user){
-    console.log("test1");
+
     if(err){
         return res.status(500).json({
             title:'An error occured',
@@ -45,7 +48,7 @@ function(err,user){
            error:{message:'Invalid login credentials'}
         });
     }
-    console.log("test2");
+  
     if(!user.verified){
         return res.status(401).json({
             title:'Login failed',
@@ -68,12 +71,15 @@ function(err,user){
 
 
 })
-console.log("test1");
+
 });
 
+/**
+ * Submit a create new username request
+ */
 router.post('/', async function (req, res, next) {
     var verifier = randomstring.generate();
-   console.log(req.body.username);
+
     req.checkBody('firstName','Name is required').notEmpty();
     req.checkBody('lastName','Email is required').notEmpty();
     req.checkBody('email', 'Email is not valid').isEmail();
@@ -113,7 +119,7 @@ router.post('/', async function (req, res, next) {
         username: req.body.username
     });
     
-    console.log(user);
+
     user.save(function(err,result){
         if(err){
             return res.status(500).json({
@@ -177,8 +183,6 @@ router.post('/', async function (req, res, next) {
     });
 
 });
-//$or: [{'email': email}, {'username': email}]}
-
 
 
 
